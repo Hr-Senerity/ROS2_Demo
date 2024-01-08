@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(ros2_demo)
+project(your_project_name)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -32,10 +32,10 @@ find_package(pcl_ros REQUIRED)
 find_package(nav2_util REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
-find_package(ros2_demo REQUIRED)
+find_package(your_project_name REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/Mymsg.msg"
+  "msg/Yourmsgname.msg"
   DEPENDENCIES geometry_msgs
 )
 
@@ -43,10 +43,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 include_directories(include)
 
 # 添加可执行文件
-add_executable(ros2_demo_node src/ros2_demo.cpp)
+add_executable(your_node_name src/your_cpp_name.cpp)
 
 # 链接库
-ament_target_dependencies(ros2_demo_node
+ament_target_dependencies(your_node_name
   rclcpp
   rclpy
   serial
@@ -61,13 +61,13 @@ ament_target_dependencies(ros2_demo_node
   pcl_ros
   nav2_util
   pcl_conversions
-  ros2_demo
+  your_project_name
   # 如果还有其他依赖项，请在这里添加
 )
 
 # 安装目标
 install(TARGETS
-  ros2_demo_node
+  your_node_name
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY include/
