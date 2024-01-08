@@ -24,11 +24,31 @@ void Your_Hpp_Name::timerCallback()
   mymsg_publisher_->publish(*mymsg_message);
 }
 
+void Your_Hpp_Name::run()
+{
+  rclcpp::Rate rate(100); // 设置频率为10Hz
+
+  while (rclcpp::ok()) {
+
+    // 这里可以添加一些自定义逻辑
+
+    RCLCPP_WARN(this->get_logger(), "这是一个警告消息！");
+
+    // 处理当前可用的回调
+    rclcpp::spin_some(shared_from_this());
+    rate.sleep();
+  }
+}
+
+
+
 int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<Your_Hpp_Name>();
-  rclcpp::spin(node);
+  // rclcpp::spin(node);
+  node->run();  // 使用 run 函数代替 rclcpp::spin(node)
+
   rclcpp::shutdown();
   return 0;
 }

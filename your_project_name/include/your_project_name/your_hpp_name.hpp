@@ -11,6 +11,8 @@ class Your_Hpp_Name : public rclcpp::Node
 public:
   Your_Hpp_Name();
 
+  void run();  // 新增函数原型
+
 private:
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
   rclcpp::Publisher<your_project_name::msg::Yourmsgname>::SharedPtr mymsg_publisher_;
