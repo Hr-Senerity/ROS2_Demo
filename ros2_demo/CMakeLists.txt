@@ -32,7 +32,12 @@ find_package(pcl_ros REQUIRED)
 find_package(nav2_util REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(ros2_demo REQUIRED)
 
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/Mymsg.msg"
+  DEPENDENCIES geometry_msgs
+)
 
 # 包含头文件目录
 include_directories(include)
@@ -56,6 +61,7 @@ ament_target_dependencies(ros2_demo_node
   pcl_ros
   nav2_util
   pcl_conversions
+  ros2_demo
   # 如果还有其他依赖项，请在这里添加
 )
 
@@ -79,8 +85,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-rosidl_generate_interfaces(${PROJECT_NAME}
-  msg/Mymsg.msg
-)
+
+
 
 ament_package()
