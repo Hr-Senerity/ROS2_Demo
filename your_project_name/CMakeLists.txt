@@ -31,13 +31,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(pcl_ros REQUIRED)
 find_package(nav2_util REQUIRED)
 find_package(pcl_conversions REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
-find_package(your_project_name REQUIRED)
-
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/Yourmsgname.msg"
-  DEPENDENCIES geometry_msgs
-)
+find_package(your_msg REQUIRED)
 
 # 包含头文件目录
 include_directories(include)
@@ -61,7 +55,7 @@ ament_target_dependencies(your_node_name
   pcl_ros
   nav2_util
   pcl_conversions
-  your_project_name
+  your_msg
   # 如果还有其他依赖项，请在这里添加
 )
 

@@ -4,7 +4,7 @@ Your_Hpp_Name::Your_Hpp_Name()
     : Node("your_node_name")
 {
   publisher_ = create_publisher<std_msgs::msg::String>("demo_topic", 10);
-  mymsg_publisher_ = create_publisher<your_project_name::msg::Yourmsgname>("my_topic", 10);
+  mymsg_publisher_ = create_publisher<your_msg::msg::Yourmsgname>("my_topic", 10);
 
   timer_ = create_wall_timer(std::chrono::seconds(1), std::bind(&Your_Hpp_Name::timerCallback, this));
 }
@@ -15,7 +15,7 @@ void Your_Hpp_Name::timerCallback()
   string_message.data = "Hello, ROS 2!";
   publisher_->publish(string_message);
 
-  auto mymsg_message = std::make_shared<your_project_name::msg::Yourmsgname>();
+  auto mymsg_message = std::make_shared<your_msg::msg::Yourmsgname>();
   mymsg_message->id = 1;
   mymsg_message->name = "Example";
   mymsg_message->value = 3.14;
