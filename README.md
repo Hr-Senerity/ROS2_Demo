@@ -40,19 +40,20 @@ ROS2_Demo/
 
 - 发布 `std_msgs/msg/String` 到 `demo_topic`
 - 发布自定义消息 `your_msg/msg/Yourmsgname` 到 `my_topic`
+- 串口示例：基于官方 `serial_driver` 打开串口并挂异步接收回调（设备不存在时仅告警，不影响其余功能）
 - `main` 中演示两种运行方式：`rclcpp::spin(node)` 与 `run()` 内使用 `rclcpp::Rate` 的定频循环（默认启用后者）
 
 ## 依赖
 
 `your_project_name/CMakeLists.txt` 中已引入常用库，未用到的可从 `CMakeLists.txt` 与 `package.xml` 中成对删除：
 
-`rclcpp`、`rclpy`、`serial`、`std_msgs`、`sensor_msgs`、`geometry_msgs`、`tf2`、`tf2_ros`、`tf2_geometry_msgs`、`nav_msgs`、`nav2_msgs`、`nav2_util`、`pcl_ros`、`pcl_conversions`、`your_msg`
+`rclcpp`、`rclpy`、`serial_driver`、`io_context`、`asio`、`std_msgs`、`sensor_msgs`、`geometry_msgs`、`tf2`、`tf2_ros`、`tf2_geometry_msgs`、`nav_msgs`、`nav2_msgs`、`nav2_util`、`pcl_ros`、`pcl_conversions`、`your_msg`
 
-Ubuntu 下安装（`serial`、`pcl_ros` 等若源内不可用则需源码安装）：
+Ubuntu 下安装（`pcl_ros` 等若源内不可用则需源码安装；`serial_driver` 的 apt 包会自动带上 `io_context`、`asio` 相关依赖）：
 
 ```bash
 sudo apt install \
-  ros-$ROS_DISTRO-serial \
+  ros-$ROS_DISTRO-serial-driver \
   ros-$ROS_DISTRO-pcl-ros \
   ros-$ROS_DISTRO-pcl-conversions \
   ros-$ROS_DISTRO-nav2-msgs \
@@ -97,6 +98,23 @@ colcon build --packages-select your_project_name
 重命名完成后重新 `colcon build` 即可。
 
 > 脚本不处理 `your_cpp_name.cpp`、`your_hpp_name.hpp`、类名 `Your_Hpp_Name` 等占位文件名/类名，如有需要请手动重命名，并同步修改 `#include` 路径与 `CMakeLists.txt` 中的源文件名。
+
+## 串口示例（serial_driver）
+
+串口使用 ROS2 官方维护的 [transport_drivers](https://github.com/ros-drivers/transport_drivers)（Humble 源内没有 ROS1 时代的 `ros-humble-serial`；wjwwood/serial 是纯 catkin 工程，不支持 ROS2）：
+
+```bash
+sudo apt install ros-humble-serial-driver
+```
+
+`your_project_name` 节点启动时调用 `setupSerial()`：打开 `/dev/ttyUSB0`（115200，8N1），挂 `async_receive` 回调打印收到的字节数。
+
+- 设备名/波特率在 `src/your_cpp_name.cpp` 的 `setupSerial()` 中修改
+- 打开失败（如无该设备）只打印警告并跳过串口功能，节点其余部分正常运行
+- 回调运行在 `io_context` 的 asio 工作线程，与 `run()` 中 `spin_some` 的线程不同，回调内访问共享数据需自行加锁
+- 不需要串口时：删除 CMakeLists.txt 与 package.xml 中 `serial_driver`/`io_context`/`asio`/`asio_cmake_module` 相关条目，并去掉 `setupSerial()` 调用即可
+
+> 模板代码按 humble 分支的 1.2.0 API 编写，与 apt 安装的版本一致。main 分支的 API（`IoContext::start/stop`、新版 `SerialDriver`）尚未发布到任何发行版。
 
 ## 环境要求
 

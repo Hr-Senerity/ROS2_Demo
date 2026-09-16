@@ -7,10 +7,15 @@
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <!-- 提供查找 asio 的 CMake 模块（FindASIO） -->
+  <buildtool_depend>asio_cmake_module</buildtool_depend>
 
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
-  <!-- <depend>serial</depend> -->
+  <!-- 串口：官方 transport_drivers 的 serial_driver（Humble 源内无 ros-humble-serial） -->
+  <depend>serial_driver</depend>
+  <depend>io_context</depend>
+  <depend>asio</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>geometry_msgs</depend>

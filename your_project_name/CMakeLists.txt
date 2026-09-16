@@ -19,7 +19,10 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
-find_package(serial REQUIRED)
+find_package(io_context REQUIRED)
+find_package(serial_driver REQUIRED)
+find_package(asio_cmake_module REQUIRED)
+find_package(ASIO REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -43,7 +46,9 @@ add_executable(your_node_name src/your_cpp_name.cpp)
 ament_target_dependencies(your_node_name
   rclcpp
   rclpy
-  serial
+  serial_driver
+  io_context
+  ASIO
   std_msgs
   sensor_msgs
   geometry_msgs
