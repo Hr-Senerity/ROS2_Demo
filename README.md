@@ -49,11 +49,12 @@ ROS2_Demo/
 
 `rclcpp`、`rclpy`、`serial_driver`、`io_context`、`asio`、`std_msgs`、`sensor_msgs`、`geometry_msgs`、`tf2`、`tf2_ros`、`tf2_geometry_msgs`、`nav_msgs`、`nav2_msgs`、`nav2_util`、`pcl_ros`、`pcl_conversions`、`your_msg`
 
-Ubuntu 下安装（`pcl_ros` 等若源内不可用则需源码安装；`serial_driver` 的 apt 包会自动带上 `io_context`、`asio` 相关依赖）：
+Ubuntu 下安装（`pcl_ros` 等若源内不可用则需源码安装。注意：`serial_driver` 的 apt 包会带上 `io_context` 与 `libasio-dev`，但 `asio_cmake_module` 属于构建期模块、不在运行时依赖里，必须显式安装，否则下游 `find_package` 时会报找不到 `asio_cmake_moduleConfig.cmake`）：
 
 ```bash
 sudo apt install \
   ros-$ROS_DISTRO-serial-driver \
+  ros-$ROS_DISTRO-asio-cmake-module \
   ros-$ROS_DISTRO-pcl-ros \
   ros-$ROS_DISTRO-pcl-conversions \
   ros-$ROS_DISTRO-nav2-msgs \
@@ -104,7 +105,7 @@ colcon build --packages-select your_project_name
 串口使用 ROS2 官方维护的 [transport_drivers](https://github.com/ros-drivers/transport_drivers)（Humble 源内没有 ROS1 时代的 `ros-humble-serial`；wjwwood/serial 是纯 catkin 工程，不支持 ROS2）：
 
 ```bash
-sudo apt install ros-humble-serial-driver
+sudo apt install ros-humble-serial-driver ros-humble-asio-cmake-module
 ```
 
 `your_project_name` 节点启动时调用 `setupSerial()`：打开 `/dev/ttyUSB0`（115200，8N1），挂 `async_receive` 回调打印收到的字节数。
@@ -112,6 +113,7 @@ sudo apt install ros-humble-serial-driver
 - 设备名/波特率在 `src/your_cpp_name.cpp` 的 `setupSerial()` 中修改
 - 打开失败（如无该设备）只打印警告并跳过串口功能，节点其余部分正常运行
 - 回调运行在 `io_context` 的 asio 工作线程，与 `run()` 中 `spin_some` 的线程不同，回调内访问共享数据需自行加锁
+- `asio_cmake_module` 是构建期 CMake 模块（提供 `FindASIO`），不在 `serial_driver` 的运行时依赖中，需单独安装
 - 不需要串口时：删除 CMakeLists.txt 与 package.xml 中 `serial_driver`/`io_context`/`asio`/`asio_cmake_module` 相关条目，并去掉 `setupSerial()` 调用即可
 
 > 模板代码按 humble 分支的 1.2.0 API 编写，与 apt 安装的版本一致。main 分支的 API（`IoContext::start/stop`、新版 `SerialDriver`）尚未发布到任何发行版。
