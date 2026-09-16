@@ -19,7 +19,8 @@ ROS2_Demo/
 │   ├── include/your_project_name/
 │   │   └── your_hpp_name.hpp          # 节点类声明
 │   └── src/
-│       └── your_cpp_name.cpp          # 节点实现与 main
+│       ├── your_cpp_name.cpp          # 节点实现（构造/析构/定时器/串口/run 循环）
+│       └── main.cpp                   # 程序入口（main 与节点实现分离）
 └── scripts/
     └── rename_project.sh              # 快速重命名模板包脚本
 ```
@@ -36,12 +37,19 @@ ROS2_Demo/
 
 ### your_project_name（C++ 节点包）
 
-基于 `rclcpp` 的节点示例：
+基于 `rclcpp` 的节点示例，`main()` 与节点实现分离：`src/main.cpp` 只负责 `rclcpp::init/shutdown` 与运行方式选择，节点逻辑全部在 `src/your_cpp_name.cpp` 和 `include/your_project_name/your_hpp_name.hpp` 中。
 
-- 发布 `std_msgs/msg/String` 到 `demo_topic`
-- 发布自定义消息 `your_msg/msg/Yourmsgname` 到 `my_topic`
+发布话题：
+
+| 话题 | 类型 | 频率 |
+|---|---|---|
+| `demo_topic` | `std_msgs/msg/String` | 1 Hz |
+| `my_topic` | `your_msg/msg/Yourmsgname` | 1 Hz |
+
+其他内容：
+
 - 串口示例：基于官方 `serial_driver` 打开串口并挂异步接收回调（设备不存在时仅告警，不影响其余功能）
-- `main` 中演示两种运行方式：`rclcpp::spin(node)` 与 `run()` 内使用 `rclcpp::Rate` 的定频循环（默认启用后者）
+- 两种运行方式（在 `src/main.cpp` 中切换）：`rclcpp::spin(node)`（回调驱动）或 `node->run()`（`rclcpp::Rate` 定频循环 + `spin_some`，默认启用）
 
 ## 依赖
 
@@ -128,6 +136,19 @@ sudo apt install ros-humble-serial-driver ros-humble-asio-cmake-module
 - 不需要串口时：删除 CMakeLists.txt 与 package.xml 中 `serial_driver`/`io_context`/`asio`/`asio_cmake_module` 相关条目，并去掉 `setupSerial()` 调用即可
 
 > 模板代码按 humble 分支的 1.2.0 API 编写，与 apt 安装的版本一致。main 分支的 API（`IoContext::start/stop`、新版 `SerialDriver`）尚未发布到任何发行版。
+
+## 常见修改点
+
+| 需求 | 修改位置 |
+|---|---|
+| 修改话题名/队列深度 | `src/your_cpp_name.cpp` 中的 `create_publisher(...)` |
+| 修改节点名 | `src/your_cpp_name.cpp` 构造函数中的 `Node("...")` |
+| 修改可执行名 | `CMakeLists.txt` 的 `add_executable` 与 `install(TARGETS ...)` |
+| 新增源文件 | 加入 `CMakeLists.txt` 的 `add_executable` 源文件列表 |
+| 切换运行方式 | `src/main.cpp` 中启用 `rclcpp::spin(node)` 或 `node->run()` |
+| 修改串口设备/波特率 | `src/your_cpp_name.cpp` 的 `setupSerial()` |
+| 新增消息 | `your_msg/msg/` 下新建 `.msg`，并加入 `your_msg/CMakeLists.txt` 的 `rosidl_generate_interfaces` |
+| 新增依赖 | `CMakeLists.txt` 的 `find_package` + `ament_target_dependencies` 与 `package.xml` 成对添加 |
 
 ## 环境要求
 

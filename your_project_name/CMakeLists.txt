@@ -40,7 +40,10 @@ find_package(your_msg REQUIRED)
 include_directories(include)
 
 # 添加可执行文件
-add_executable(your_node_name src/your_cpp_name.cpp)
+add_executable(your_node_name
+  src/your_cpp_name.cpp
+  src/main.cpp
+)
 
 # 链接库
 ament_target_dependencies(your_node_name
