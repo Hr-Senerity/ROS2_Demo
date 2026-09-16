@@ -89,16 +89,27 @@ colcon build --packages-select your_project_name
 
 ## 快速重命名（模板用法）
 
-`scripts/rename_project.sh` 可将 `your_project_name` 一键重命名为自己的包名，包括目录、`include/` 子目录，以及 `CMakeLists.txt`、`package.xml`、`src/`、`include/` 中出现的 project_name 与 node_name：
+`scripts/rename_project.sh` 一键重命名 `your_project_name` 模板包：
 
 ```bash
 ./scripts/rename_project.sh my_new_package              # 节点名默认为 my_new_package_node
 ./scripts/rename_project.sh my_new_package my_node_name # 同时指定节点名
 ```
 
-重命名完成后重新 `colcon build` 即可。
+脚本会完成：
 
-> 脚本不处理 `your_cpp_name.cpp`、`your_hpp_name.hpp`、类名 `Your_Hpp_Name` 等占位文件名/类名，如有需要请手动重命名，并同步修改 `#include` 路径与 `CMakeLists.txt` 中的源文件名。
+1. 目录重命名：`your_project_name/` → `my_new_package/`，`include/your_project_name/` → `include/my_new_package/`
+2. 文件重命名：`your_hpp_name.hpp`、`your_cpp_name.cpp` → `my_new_package.hpp`、`my_new_package.cpp`
+3. 内容替换（`CMakeLists.txt`、`package.xml`、`src/`、`include/`）：
+   - 包名：`your_project_name` → `my_new_package`
+   - 节点名：`your_node_name` → `my_new_package_node`
+   - `#include` 路径与 CMake 源文件路径中的头/源文件名
+   - include 守卫宏：`YOUR_HPP_NAME__YOUR_HPP_NAME_HPP_` → `MY_NEW_PACKAGE__MY_NEW_PACKAGE_HPP_`
+   - 类名：`Your_Hpp_Name` → `MyNewPackage`（新包名的 PascalCase）
+
+重命名完成后重新 `colcon build` 即可；git 仓库内脚本使用 `git mv` 保留文件历史。
+
+> 注意：脚本只能对未重命名的原始模板执行。`your_msg` 包名不受影响，如需一并修改请手动处理。
 
 ## 串口示例（serial_driver）
 
