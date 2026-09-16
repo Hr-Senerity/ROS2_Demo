@@ -1,2 +1,104 @@
 # ROS2_Demo
-Ros2 general function package to foxy/humble
+
+ROS2 通用功能包模板，兼容 **foxy / humble**。
+
+包含一个自定义消息接口包 `your_msg` 和一个 C++ 节点包 `your_project_name`，并附带快速重命名脚本，可直接作为新项目的起手模板。
+
+## 工作空间结构
+
+```text
+ROS2_Demo/
+├── your_msg/                          # 自定义消息接口包
+│   ├── CMakeLists.txt
+│   ├── package.xml
+│   └── msg/
+│       └── Yourmsgname.msg            # 自定义消息定义
+├── your_project_name/                 # C++ 节点包（依赖 your_msg）
+│   ├── CMakeLists.txt
+│   ├── package.xml
+│   ├── include/your_project_name/
+│   │   └── your_hpp_name.hpp          # 节点类声明
+│   └── src/
+│       └── your_cpp_name.cpp          # 节点实现与 main
+└── scripts/
+    └── rename_project.sh              # 快速重命名模板包脚本
+```
+
+## 包说明
+
+### your_msg（消息接口包）
+
+只负责接口定义与生成，与节点逻辑解耦。多个节点包可以共同依赖同一个消息包，避免每个包内重复生成接口。
+
+- 消息定义：`your_msg/msg/Yourmsgname.msg`（当前为 `uint32 id` / `string name` / `float32 value`）
+- 新增消息：在 `msg/` 下新建 `xxx.msg`，并在 `your_msg/CMakeLists.txt` 的 `rosidl_generate_interfaces` 中追加一行 `"msg/xxx.msg"`
+- 消息中若使用其他包的字段类型（如 `geometry_msgs/Pose`），需在 `rosidl_generate_interfaces` 的 `DEPENDENCIES` 以及 `package.xml` 中补充对应依赖
+
+### your_project_name（C++ 节点包）
+
+基于 `rclcpp` 的节点示例：
+
+- 发布 `std_msgs/msg/String` 到 `demo_topic`
+- 发布自定义消息 `your_msg/msg/Yourmsgname` 到 `my_topic`
+- `main` 中演示两种运行方式：`rclcpp::spin(node)` 与 `run()` 内使用 `rclcpp::Rate` 的定频循环（默认启用后者）
+
+## 依赖
+
+`your_project_name/CMakeLists.txt` 中已引入常用库，未用到的可从 `CMakeLists.txt` 与 `package.xml` 中成对删除：
+
+`rclcpp`、`rclpy`、`serial`、`std_msgs`、`sensor_msgs`、`geometry_msgs`、`tf2`、`tf2_ros`、`tf2_geometry_msgs`、`nav_msgs`、`nav2_msgs`、`nav2_util`、`pcl_ros`、`pcl_conversions`、`your_msg`
+
+Ubuntu 下安装（`serial`、`pcl_ros` 等若源内不可用则需源码安装）：
+
+```bash
+sudo apt install \
+  ros-$ROS_DISTRO-serial \
+  ros-$ROS_DISTRO-pcl-ros \
+  ros-$ROS_DISTRO-pcl-conversions \
+  ros-$ROS_DISTRO-nav2-msgs \
+  ros-$ROS_DISTRO-nav2-util \
+  ros-$ROS_DISTRO-tf2-ros \
+  ros-$ROS_DISTRO-tf2-geometry-msgs
+```
+
+## 编译与运行
+
+```bash
+# 在工作空间根目录（本仓库根目录）执行
+colcon build
+source install/setup.bash
+
+# 运行节点
+ros2 run your_project_name your_node_name
+
+# 验证话题
+ros2 topic list
+ros2 topic echo /my_topic
+```
+
+也可以只编译其中一个包：
+
+```bash
+colcon build --packages-select your_msg
+colcon build --packages-select your_project_name
+```
+
+> `your_project_name` 依赖 `your_msg`，首次编译建议按 `your_msg` -> `your_project_name` 的顺序，或直接在工作空间根目录 `colcon build` 让 colcon 自动处理依赖顺序。
+
+## 快速重命名（模板用法）
+
+`scripts/rename_project.sh` 可将 `your_project_name` 一键重命名为自己的包名，包括目录、`include/` 子目录，以及 `CMakeLists.txt`、`package.xml`、`src/`、`include/` 中出现的 project_name 与 node_name：
+
+```bash
+./scripts/rename_project.sh my_new_package              # 节点名默认为 my_new_package_node
+./scripts/rename_project.sh my_new_package my_node_name # 同时指定节点名
+```
+
+重命名完成后重新 `colcon build` 即可。
+
+> 脚本不处理 `your_cpp_name.cpp`、`your_hpp_name.hpp`、类名 `Your_Hpp_Name` 等占位文件名/类名，如有需要请手动重命名，并同步修改 `#include` 路径与 `CMakeLists.txt` 中的源文件名。
+
+## 环境要求
+
+- ROS 2 foxy / humble（Ubuntu 20.04 / 22.04）
+- colcon：`sudo apt install python3-colcon-common-extensions`
